@@ -21,30 +21,37 @@ async function verifyToken(token:string) {
 export async function middleware(request: NextRequest) {
     const {pathname } = request.nextUrl;
 
-    const stored = localStorage.getItem("auth");
+    const stored = request.cookies.get("auth")?.value;
 
     let isTokenVerified = false;
 
     if (stored){
-            const parsed:AuthResponse = JSON.parse(stored);
-            isTokenVerified = await verifyToken(parsed.token);
+            try {
+                const parsed: AuthResponse = JSON.parse(stored);
+                isTokenVerified = await verifyToken(parsed.token);
+            } 
+            catch{
+                isTokenVerified = false;
+            }
     }
 
-    const isProtectedRoute = protectedRoutes.some((route) => {
-        pathname.startsWith(route);
-        });
+    const isProtectedRoute = protectedRoutes.some((route) => 
+        pathname.startsWith(route)
+        );
 
     const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
     if (isProtectedRoute && !isTokenVerified)
     {
-        return NextResponse.redirect('/login');
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     if (isAuthRoute && isTokenVerified){
-        return NextResponse.redirect('/user/threads');
+        return NextResponse.redirect(new URL('/user/threads', request.url));
     }
 
     return NextResponse.next();
 
 }
+
+export const config = { matcher: ["/user/:path*", "/login", "/register"] }; 

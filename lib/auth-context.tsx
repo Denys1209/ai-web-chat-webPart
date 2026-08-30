@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 import type { AuthResponse } from "./authTypes";
+import { getAuthCookie, setAuthCookie, clearAuthCookie } from "./cookies";
 import { json } from "stream/consumers";
 
 interface AuthState {
@@ -20,24 +21,28 @@ export function AuthProvider({children}: {children: ReactNode}){
     const [user, setUser] = useState<AuthState["user"]>(null);
 
     useEffect(() => {
-        const stored = localStorage.getItem("auth");
+        const stored = getAuthCookie();
 
         if (stored){
-            const parsed: AuthResponse = JSON.parse(stored);
-            setToken(parsed.token);
-            setUser(parsed);
+            try {
+                const parsed: AuthResponse = JSON.parse(stored);
+                setToken(parsed.token);
+                setUser(parsed);
+            } catch {
+                clearAuthCookie();
+            }
         }
 
     }, []);
 
     const setAuth = (response: AuthResponse) => {
-        localStorage.setItem("auth", JSON.stringify(response));
+        setAuthCookie(JSON.stringify(response));
         setToken(response.token);
         setUser(response);
     };
 
     const logout = () => {
-        localStorage.removeItem("auth");
+        clearAuthCookie();
         setToken(null);
         setUser(null);
     };

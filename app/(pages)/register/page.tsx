@@ -37,7 +37,7 @@ export default function RegisterPage() {
             router.push("/users/threads");
         } catch(err) {
             setError(err instanceof Error ? err.message : "Registration failed");
-            router.push("/threads");
+            router.push("/users/threads");
 
         } 
         finally{
@@ -98,7 +98,7 @@ export default function RegisterPage() {
                             )
                         }
 
-                        
+
                         <Field orientation="horizontal" className="mt-3">
                             <Button type="reset" variant="outline"
                              className="flex-1"
