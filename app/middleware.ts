@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import {jwtVerify } from 'jose';
 import { AuthResponse } from "@/lib/authTypes";
 
-const protectedRoutes = ['/user']
+const protectedRoutes = ['/']
 
 const authRoutes = ['/login', '/register'];
 

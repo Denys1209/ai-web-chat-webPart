@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 
 import type { AuthResponse } from "./authTypes";
 import { getAuthCookie, setAuthCookie, clearAuthCookie } from "./cookies";
-import { json } from "stream/consumers";
 
 interface AuthState {
     user: Omit<AuthResponse, "token"> | null;

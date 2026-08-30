@@ -1,8 +1,7 @@
-import { Playwrite_DK_Loopet } from "next/font/google";
 import type { AuthResponse, LoginPayload, RegisterPayload } from "./authTypes";
 
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http:localhost:5000//";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http:localhost:5000"
 
 async function postJson<ResponseType, RequestType>(path:string, body: RequestType) : Promise<ResponseType> {
 

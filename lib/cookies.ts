@@ -33,5 +33,5 @@ export function getAuthCookie(): string | null {
 }
 
 export function clearAuthCookie() {
-    document.cookie = '${COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax';
+    document.cookie = `${COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
 }
