@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { register } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,7 +19,7 @@ export default function RegisterPage() {
 
     const router = useRouter();
 
-    const {setAuth} = useAuth();
+    const { setAuth } = useAuth();
 
     const [displayedName, setDisplayedName] = useState("");
     const [gmail, setGmail] = useState("");
@@ -32,15 +33,15 @@ export default function RegisterPage() {
         setIsSubmitting(true);
 
         try {
-            const result = await register({displayedName, gmail, password});
+            const result = await register({ displayedName, gmail, password });
             setAuth(result);
             router.push("/users/threads");
-        } catch(err) {
+        } catch (err) {
             setError(err instanceof Error ? err.message : "Registration failed");
-            router.push("/users/threads");
+            
 
-        } 
-        finally{
+        }
+        finally {
             setIsSubmitting(false);
         }
     }
@@ -60,11 +61,11 @@ export default function RegisterPage() {
                         <FieldGroup>
                             <Field>
                                 <FieldLabel htmlFor="register-name"> Displayed Name </FieldLabel>
-                                <Input 
-                                id="register-name"
-                                value={displayedName}
-                                onChange={(e) => setDisplayedName(e.target.value)}
-                                required
+                                <Input
+                                    id="register-name"
+                                    value={displayedName}
+                                    onChange={(e) => setDisplayedName(e.target.value)}
+                                    required
                                 />
                             </Field>
                         </FieldGroup>
@@ -84,10 +85,10 @@ export default function RegisterPage() {
                         <Field>
                             <FieldLabel htmlFor="register-password">Password</FieldLabel>
                             <Input id="register-password" type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            minLength={3}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                minLength={3}
                             />
                         </Field>
                         {
@@ -98,16 +99,21 @@ export default function RegisterPage() {
                             )
                         }
 
+                        <Field className="mt-1 mb-1">
+                            <Link href="/login" >
+                                Already have an account?
+                            </Link></Field>
+
 
                         <Field orientation="horizontal" className="mt-3">
                             <Button type="reset" variant="outline"
-                             className="flex-1"
-                             onClick={() => setError(null)}
-                             >
+                                className="flex-1"
+                                onClick={() => setError(null)}
+                            >
                                 Reset
                             </Button>
                             <Button type="submit" className="flex-1"
-                            disabled={isSubmitting}
+                                disabled={isSubmitting}
                             >
                                 {isSubmitting ? "Creating account..." : "Submit"}
                             </Button>

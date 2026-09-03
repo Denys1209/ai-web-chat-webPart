@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-import type { AuthResponse } from "./authTypes";
+import type { AuthResponse } from "./types/authTypes";
 import { getAuthCookie, setAuthCookie, clearAuthCookie } from "./cookies";
 
 interface AuthState {

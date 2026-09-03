@@ -6,6 +6,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { login } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -27,7 +28,7 @@ export default function LoginPage() {
         try {
             const result = await login({ gmail, password });
             setAuth(result);
-            router.push("/users/threads");
+            router.push("/user/threads");
         } catch {
             setError("Invalid email or password");
         } finally {
@@ -71,6 +72,12 @@ export default function LoginPage() {
                                     {error}
                                 </p>
                             )}
+                            <Field className="mt-1 mb-1">
+                                <Link href="/register" >
+                                    Don't have an account?
+                                </Link>
+                            </Field>
+
                             <Button type="submit" className="w-full" disabled={isSubmitting}>
                                 {isSubmitting ? "Signing in..." : "Log in"}
                             </Button>

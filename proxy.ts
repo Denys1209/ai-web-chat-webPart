@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import {jwtVerify } from 'jose';
-import { AuthResponse } from "@/lib/authTypes";
+import { AuthResponse } from "@/lib/types/authTypes";
 
-const protectedRoutes = ['/']
 
 const authRoutes = ['/login', '/register'];
 
@@ -18,7 +17,7 @@ async function verifyToken(token:string) {
 }
 
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const {pathname } = request.nextUrl;
 
     const stored = request.cookies.get("auth")?.value;
@@ -35,18 +34,18 @@ export async function middleware(request: NextRequest) {
             }
     }
 
-    const isProtectedRoute = protectedRoutes.some((route) => 
-        pathname.startsWith(route)
-        );
+    
 
     const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
-    if (isProtectedRoute && !isTokenVerified)
+    const isUserRoute = pathname.startsWith("/user");
+
+    if (!isAuthRoute && !isTokenVerified)
     {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (isAuthRoute && isTokenVerified){
+    if ((isAuthRoute && isTokenVerified) || (!isUserRoute && isTokenVerified)){
         return NextResponse.redirect(new URL('/user/threads', request.url));
     }
 
@@ -54,4 +53,9 @@ export async function middleware(request: NextRequest) {
 
 }
 
-export const config = { matcher: ["/user/:path*", "/login", "/register"] }; 
+export const config = {
+  matcher: [
+    // Exclude API routes, static files, image optimizations, and .png files
+    '/((?!api|_next/static|_next/image|.*\\.png$).*)',
+  ],
+}
