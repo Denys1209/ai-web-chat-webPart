@@ -1,6 +1,7 @@
 import type { AuthResponse, LoginPayload, RegisterPayload } from "./types/authTypes";
 import { getAuthCookie } from "./cookies";
 import { CreateThreadDto, GetThreadDto } from "./types/threadTypes";
+import { AddMessageResponse, CreateMessageDto, GetMessageDto } from "./types/messageTypes";
 
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http:localhost:5000"
@@ -69,5 +70,11 @@ export const login = (payload: LoginPayload) =>
 export const getThreads = () => getJson<GetThreadDto[]>(`/api/threads`);
 
 export const createThread = (payload: CreateThreadDto) => postJson<{id:string}, CreateThreadDto>(`/api/threads`, payload);
+
+export const getMessagesForThread = (id: string) => getJson<GetMessageDto[]>(`/api/threads/${id}`);
+
+export const addMessageToThread = (id: string, payload: CreateMessageDto) => postJson<AddMessageResponse, CreateMessageDto>(`/api/threads/${id}/messages`, payload);
+
+
 
 

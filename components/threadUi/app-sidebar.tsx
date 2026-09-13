@@ -50,7 +50,7 @@ export function AppSidebar() {
           <span className="font-semibold text-white text-2xl group-data-[collapsible=icon]:hidden">AI Chat</span>
           <div className="items-center gap-1 group-data-[collapsible=icon]:flex-col flex">
             <Button size="icon" className="bg-transparent cursor-pointer m-auto" onClick={toggleSidebar}><PanelLeftIcon className="size-4" /></Button>
-            <CreateThreadDialog/>
+            <CreateThreadDialog threads={threads} setThreads={setThreads} />
             <Button size="icon" className="bg-transparent cursor-pointer m-auto"><Search className="size-4" /></Button>
           </div>
         </div>

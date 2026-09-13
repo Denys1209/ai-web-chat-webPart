@@ -14,12 +14,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createThread } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import { GetThreadDto } from "@/lib/types/threadTypes"
 import { Console } from "console"
 import { Pencil } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-export function CreateThreadDialog() {
+export function CreateThreadDialog(
+  {
+    threads,
+    setThreads,
+
+  }: {
+    threads: GetThreadDto[] | null,
+    setThreads: (value: GetThreadDto[]) => void
+  }) {
   const router = useRouter();
 
   const auth = useAuth();
@@ -32,11 +41,18 @@ export function CreateThreadDialog() {
 
 
     try {
-      const result = await createThread({
-        name: name,
-        userId: auth.user?.id!
-      });
-      router.push(`/user/threads/${result.id}`);
+      if (threads != null) {
+        const result = await createThread({
+          name: name,
+          userId: auth.user?.id!
+        });
+        const newThread: GetThreadDto = {
+          id: result.id,
+          name: name
+        };
+        setThreads([ newThread,...threads! ])
+        router.push(`/user/threads/${result.id}`);
+      }
     } catch {
 
     }
@@ -60,7 +76,7 @@ export function CreateThreadDialog() {
           </FieldGroup>
           <DialogFooter>
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button type="submit" className="cursor-pointer" >Create</Button>
+            <DialogClose render={<Button type="submit" className="cursor-pointer" >Create</Button>} />
           </DialogFooter>
 
         </form>

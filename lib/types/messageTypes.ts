@@ -29,3 +29,10 @@ export interface CreateMessageDto
     imageAttachments: CreateImageAttachmentDto[],
 }
 
+
+export interface AddMessageResponse 
+{
+    userMessageId: string,
+    messageDto: GetMessageDto
+
+}

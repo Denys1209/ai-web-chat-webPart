@@ -37,17 +37,17 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-            <Card className="w-full max-w-sm">
+        <div className="flex min-h-screen items-center justify-center  p-4 bg-black">
+            <Card className="w-full max-w-sm bg-black border-white border-1 shadow-md shadow-white">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Welcome back</CardTitle>
-                    <CardDescription>Log in to continue to your threads.</CardDescription>
+                    <CardTitle className="text-2xl text-white">Welcome back</CardTitle>
+                    <CardDescription className="text-white">Log in to continue to your threads.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <FieldGroup>
                             <Field>
-                                <FieldLabel htmlFor="login-email">Email</FieldLabel>
+                                <FieldLabel htmlFor="login-email" className="text-white">Email</FieldLabel>
                                 <Input
                                     id="login-email"
                                     type="email"
@@ -58,7 +58,7 @@ export default function LoginPage() {
                                 ></Input>
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="login-password">Password</FieldLabel>
+                                <FieldLabel htmlFor="login-password" className="text-white">Password</FieldLabel>
                                 <Input
                                     id="login-password"
                                     type="password"
@@ -72,13 +72,13 @@ export default function LoginPage() {
                                     {error}
                                 </p>
                             )}
-                            <Field className="mt-1 mb-1">
+                            <Field className="mt-1 mb-1 text-white">
                                 <Link href="/register" >
                                     Don't have an account?
                                 </Link>
                             </Field>
 
-                            <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            <Button type="submit" className="w-full text-white bg-indigo-700 cursor-pointer hover:bg-amber-700" disabled={isSubmitting}>
                                 {isSubmitting ? "Signing in..." : "Log in"}
                             </Button>
                         </FieldGroup>

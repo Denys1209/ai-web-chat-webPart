@@ -27,7 +27,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body>
         <AuthProvider>
+          <TooltipProvider>
             {children}
+          </TooltipProvider>
         </AuthProvider>
       </body>
     </html>

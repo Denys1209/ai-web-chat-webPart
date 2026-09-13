@@ -35,7 +35,7 @@ export default function RegisterPage() {
         try {
             const result = await register({ displayedName, gmail, password });
             setAuth(result);
-            router.push("/users/threads");
+            router.push("/user/threads");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Registration failed");
             
@@ -48,18 +48,18 @@ export default function RegisterPage() {
 
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-            <Card className="w-full max-w-sm">
+        <div className="flex min-h-screen items-center justify-center bg-black  p-4">
+            <Card className="w-full max-w-sm border-white border-1 shadow-md bg-black ">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Create an account</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-2xl text-white">Create an account</CardTitle>
+                    <CardDescription className="text-white">
                         Enter your details below to get started.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <FieldGroup>
-                            <Field>
+                            <Field className="text-white">
                                 <FieldLabel htmlFor="register-name"> Displayed Name </FieldLabel>
                                 <Input
                                     id="register-name"
@@ -69,7 +69,7 @@ export default function RegisterPage() {
                                 />
                             </Field>
                         </FieldGroup>
-                        <Field>
+                        <Field className="text-white">
                             <FieldLabel htmlFor="register-email">Email</FieldLabel>
                             <Input
                                 id="register-email"
@@ -78,11 +78,11 @@ export default function RegisterPage() {
                                 onChange={(e) => setGmail(e.target.value)}
                                 required
                             />
-                            <FieldDescription>
+                            <FieldDescription className="text-white">
                                 We will send updates to this address.
                             </FieldDescription>
                         </Field>
-                        <Field>
+                        <Field className="text-white">
                             <FieldLabel htmlFor="register-password">Password</FieldLabel>
                             <Input id="register-password" type="password"
                                 value={password}
@@ -93,13 +93,13 @@ export default function RegisterPage() {
                         </Field>
                         {
                             error && (
-                                <p className="text-sm text-destructive" role="alert">
+                                <p className="text-sm text-destructive " role="alert">
                                     {error}
                                 </p>
                             )
                         }
 
-                        <Field className="mt-1 mb-1">
+                        <Field className="mt-1 mb-1 text-white">
                             <Link href="/login" >
                                 Already have an account?
                             </Link></Field>
@@ -107,12 +107,12 @@ export default function RegisterPage() {
 
                         <Field orientation="horizontal" className="mt-3">
                             <Button type="reset" variant="outline"
-                                className="flex-1"
+                                className="flex-1  cursor-pointer border-none "
                                 onClick={() => setError(null)}
                             >
                                 Reset
                             </Button>
-                            <Button type="submit" className="flex-1"
+                            <Button type="submit" className="flex-1 text-white bg-amber-700 hover:bg-indigo-700 cursor-pointer"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? "Creating account..." : "Submit"}
