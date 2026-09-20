@@ -75,6 +75,8 @@ export const getMessagesForThread = (id: string) => getJson<GetMessageDto[]>(`/a
 
 export const addMessageToThread = (id: string, payload: CreateMessageDto) => postJson<AddMessageResponse, CreateMessageDto>(`/api/threads/${id}/messages`, payload);
 
+export const getImageUrl = (url:string) => `${API_BASE}/${url}`;
+
 
 
 

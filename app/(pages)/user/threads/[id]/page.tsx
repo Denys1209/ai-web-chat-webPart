@@ -5,6 +5,7 @@ import ChatHistory from "@/components/threadUi/chatHistory/chat-history";
 import ChatHistorySkeleton from "@/components/threadUi/chatHistory/chat-history-skeleton";
 import { addMessageToThread, getMessagesForThread } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { CreateImageAttachmentDto } from "@/lib/types/imageAttachmentTypes";
 import { CreateMessageDto, GetMessageDto, Roles } from "@/lib/types/messageTypes";
 import { Console } from "console";
 import { SetStateAction, use, useEffect, useState } from "react";
@@ -20,6 +21,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const [messages, setMessages] = useState<GetMessageDto[]>([]);
 
+
+
   useEffect(() => {
     getMessagesForThread(id).then((data) => {
       setMessages(data);
@@ -32,6 +35,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const [value, setValue] = useState<string>("");
 
+
+  const [imageAttached, setImageAttached] = useState<CreateImageAttachmentDto[] | null>(null);
+
+
+
   const handleKeyUp = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter" || !value.trim()) return;
 
@@ -41,7 +49,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
     const tempId = crypto.randomUUID();
     const request: CreateMessageDto = {
-      imageAttachments: [],
+      imageAttachments: imageAttached ?? [],
       role: Roles.User,
       text,
       thoughts: "",
@@ -203,7 +211,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
       <div className="w-full flex justify-center pb-4 pt-2 bg-transparent shadow-lg shadow-black">
         <div className="w-full m-auto max-w-3xl">
-          <ChatInput value={value} setValue={setValue} onKeyUp={handleKeyUp} isResponding={isResponding} />
+          <ChatInput value={value} setValue={setValue} onKeyUp={handleKeyUp} isResponding={isResponding} onFileSelect={(imageAttached: CreateImageAttachmentDto) => {
+            setImageAttached([imageAttached])
+          }} />
         </div>
       </div>
     </div>

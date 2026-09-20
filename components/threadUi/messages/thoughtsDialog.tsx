@@ -33,7 +33,7 @@ export default function ThoughtsDialog( {message} : {message:GetMessageDto}) {
         </DialogHeader>
         <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
           
-            <p  className="mb-4 leading-normal">
+            <p  className="mb-4 leading-normal whitespace-pre-wrap">
               {message.thoughts}
             </p>
          

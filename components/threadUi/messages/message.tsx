@@ -3,6 +3,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { GetMessageDto, Roles } from "@/lib/types/messageTypes";
 import { Brain, Copy } from "lucide-react";
 import ThoguhtsDialog from "./thoughtsDialog";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/api";
 
 
 
@@ -15,7 +17,19 @@ export default function Message({
     return (
         <div className="flex-col max-w-[90%]">
             <div className={` p-3 text-white flex-col  rounded-full h-auto text-wrap mt-5 ${message.role === Roles.User ? 'bg-indigo-700' : ''}`}>
-                <span className="">{message.text}</span>
+                <span className="whitespace-pre-wrap">{message.text}</span>
+                {
+                    message.imageAttachments.map((e, index) => <Image
+                    className="rounded-full "
+                    src={getImageUrl(e.url)}
+                    alt="2"
+                    key={index}
+                    width={50}
+                    height={50}
+                    loading="eager"
+                    unoptimized 
+                    />)
+                    }
 
             </div>
             <div className="flex-row items-start mt-3">
