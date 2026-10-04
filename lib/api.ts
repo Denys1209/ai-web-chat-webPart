@@ -2,9 +2,10 @@ import type { AuthResponse, LoginPayload, RegisterPayload } from "./types/authTy
 import { getAuthCookie } from "./cookies";
 import { CreateThreadDto, GetThreadDto } from "./types/threadTypes";
 import { AddMessageResponse, CreateMessageDto, GetMessageDto } from "./types/messageTypes";
+import { read } from "fs";
 
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http:localhost:5000"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"
 
 function authHeaders(): HeadersInit {
     const stored = getAuthCookie();
@@ -60,6 +61,72 @@ async function getJson<ResponseType>(path:string) : Promise<ResponseType> {
     return res.json();
 
 }
+
+
+export async function streamMessageToThread(
+    id: string,
+    payload: CreateMessageDto,
+    onToken: (token: string) => void,
+    signal?: AbortSignal
+):Promise<void> {
+    const res = await fetch(`${API_BASE}/api/threads/${id}/messages/stream`, 
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "text/event-stream",
+                ...authHeaders(),
+            },
+            body: JSON.stringify(payload),
+            signal
+        });
+
+        if (!res.ok || !res.body)
+        {
+            const message = await res.text();
+            throw new Error(message || `Request failed with status ${res.status}`);
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while(true)
+        {
+            const {value, done} = await reader.read();
+
+            if (done) break;
+
+            buffer += decoder.decode(value, {stream: true});
+
+            const frames = buffer.split("\n\n");
+
+            buffer = frames.pop() ?? "";
+
+            for (const frame of frames)
+            {
+                for (const line of frame.split("\n"))
+                {
+                    if (!line.startsWith("data:")) continue;
+                    
+                    const json = line.slice(5).trim();
+
+                    if (!json) continue;
+
+                    try {
+                        const {token } = JSON.parse(json) as {token: string};
+
+                        onToken(token);
+                    } catch {
+
+                    }
+                    
+                }
+            }
+
+        }
+}
+
 
 
 export const register = (paylod: RegisterPayload) => postJson<AuthResponse, RegisterPayload>("/api/auth/register", paylod);

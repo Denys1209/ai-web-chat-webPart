@@ -18,9 +18,10 @@ export default function Message({
         <div className="flex-col max-w-[90%]">
             <div className={` p-3 text-white flex-col  rounded-full h-auto text-wrap mt-5 ${message.role === Roles.User ? 'bg-indigo-700' : ''}`}>
                 <span className="whitespace-pre-wrap">{message.text}</span>
+                <div className="flex">
                 {
                     message.imageAttachments.map((e, index) => <Image
-                    className="rounded-full "
+                    className="rounded-full mr-2 "
                     src={getImageUrl(e.url)}
                     alt="2"
                     key={index}
@@ -29,7 +30,8 @@ export default function Message({
                     loading="eager"
                     unoptimized 
                     />)
-                    }
+                }
+                </div>
 
             </div>
             <div className="flex-row items-start mt-3">

@@ -3,12 +3,12 @@
 import ChatInput from "@/components/threadUi/chat-intput";
 import ChatHistory from "@/components/threadUi/chatHistory/chat-history";
 import ChatHistorySkeleton from "@/components/threadUi/chatHistory/chat-history-skeleton";
-import { addMessageToThread, getMessagesForThread } from "@/lib/api";
+import { addMessageToThread, getMessagesForThread, streamMessageToThread } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { CreateImageAttachmentDto } from "@/lib/types/imageAttachmentTypes";
 import { CreateMessageDto, GetMessageDto, Roles } from "@/lib/types/messageTypes";
 import { Console } from "console";
-import { SetStateAction, use, useEffect, useState } from "react";
+import { SetStateAction, use, useEffect, useRef, useState } from "react";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -17,9 +17,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
   const [isResponding, setIsResponding] = useState(false);
 
+  const [isStream, setIsStream] = useState(false);
+
   const auth = useAuth();
 
   const [messages, setMessages] = useState<GetMessageDto[]>([]);
+
+  const abortRef = useRef<AbortController | null>(null);
+
+  const [value, setValue] = useState<string>("");
+
+
+  const [imagesAttached, setImagesAttached] = useState<CreateImageAttachmentDto[]>([]);
 
 
 
@@ -33,12 +42,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   }, [])
 
 
-  const [value, setValue] = useState<string>("");
-
-
-  const [imageAttached, setImageAttached] = useState<CreateImageAttachmentDto[] | null>(null);
-
-
+  
 
   const handleKeyUp = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter" || !value.trim()) return;
@@ -49,7 +53,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
     const tempId = crypto.randomUUID();
     const request: CreateMessageDto = {
-      imageAttachments: imageAttached ?? [],
+      imageAttachments: imagesAttached,
       role: Roles.User,
       text,
       thoughts: "",
@@ -65,14 +69,40 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setImagesAttached([])
 
     try {
-      const response = await addMessageToThread(id, request);
+      if (!isStream){
+        const response = await addMessageToThread(id, request);
+        setMessages(prev => [
+          ...prev.map(m => (m.id === tempId ? { ...m, id: response.userMessageId } : m)),
+          response.messageDto,
+        ]);
+      }
+      else
+      {
 
-      setMessages(prev => [
-        ...prev.map(m => (m.id === tempId ? { ...m, id: response.userMessageId } : m)),
-        response.messageDto,
-      ]);
+        let instantOfMessage: GetMessageDto  = { role: Roles.Assistant, text: "", id: "", imageAttachments: [], thoughts: "" };
+
+        setMessages(prev => [...prev, instantOfMessage ]);
+
+        const controller = new AbortController();
+        abortRef.current = controller;
+
+        await streamMessageToThread(
+                id,
+                request, 
+                token => {
+                    setMessages(prev => {
+                        const copy = [...prev];
+                        const last = copy[copy.length - 1];
+                        copy[copy.length - 1] = { ...last, text: last.text + token };
+                        return copy;
+                    });
+                },
+                controller.signal
+            );
+      }
     } catch (err) {
       console.error(err); 
       setMessages(prev => prev.filter(m => m.id !== tempId)); 
@@ -80,122 +110,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       setIsResponding(false);
     }
   };
-
-
-  // const messages: GetMessageDto[] = [
-  //   {
-  //     id: "1",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "2",
-  //     role: Roles.Assistant,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "3",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "4",
-  //     role: Roles.Assistant,
-  //     text: "Teststs ksjcd njasnd ljcnajd ncjdna cjknjck najnd jkcn djksncjk ndkcnkjsn cjdnjcnj ncjn jnacjk dnacn djsnjkcn djskncjk sncjkn sdjc nsk ncj sncj nsjcns jnc nsn cj sn cjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  // {
-  //     id: "1",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "2",
-  //     role: Roles.Assistant,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "3",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "4",
-  //     role: Roles.Assistant,
-  //     text: "Teststs ksjcd njasnd ljcnajd ncjdna cjknjck najnd jkcn djksncjk ndkcnkjsn cjdnjcnj ncjn jnacjk dnacn djsnjkcn djskncjk sncjkn sdjc nsk ncj sncj nsjcns jnc nsn cj sn cjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "1",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "2",
-  //     role: Roles.Assistant,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "3",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "4",
-  //     role: Roles.Assistant,
-  //     text: "Teststs ksjcd njasnd ljcnajd ncjdna cjknjck najnd jkcn djksncjk ndkcnkjsn cjdnjcnj ncjn jnacjk dnacn djsnjkcn djskncjk sncjkn sdjc nsk ncj sncj nsjcns jnc nsn cj sn cjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  // {
-  //     id: "1",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "2",
-  //     role: Roles.Assistant,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "3",
-  //     role: Roles.User,
-  //     text: "Teststsksjcdnjasn djcnajdncjdnacjkn jcknajn ldj kcn djks ncjkndk cnkjsncjd njcnjn cjnjnacjkd nacndjsn jkcndjs knc ljksnc jknsdj cns kncjsncjnsjc nsjnc nsn lcjs ncjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   },
-  //   {
-  //     id: "4",
-  //     role: Roles.Assistant,
-  //     text: "Teststs ksjcd njasnd ljcnajd ncjdna cjknjck najnd jkcn djksncjk ndkcnkjsn cjdnjcnj ncjn jnacjk dnacn djsnjkcn djskncjk sncjkn sdjc nsk ncj sncj nsjcns jnc nsn cj sn cjn jks",
-  //     thoughts: "",
-  //     imageAttachments: []
-  //   }
-  // ]
 
 
 
@@ -211,9 +125,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
       <div className="w-full flex justify-center pb-4 pt-2 bg-transparent shadow-lg shadow-black">
         <div className="w-full m-auto max-w-3xl">
-          <ChatInput value={value} setValue={setValue} onKeyUp={handleKeyUp} isResponding={isResponding} onFileSelect={(imageAttached: CreateImageAttachmentDto) => {
-            setImageAttached([imageAttached])
-          }} />
+          <ChatInput value={value} setValue={setValue} onKeyUp={handleKeyUp} isResponding={isResponding} setImagesAttached={setImagesAttached} isStream={isStream} setStream={setIsStream} imagesAttached={imagesAttached}  />
         </div>
       </div>
     </div>
