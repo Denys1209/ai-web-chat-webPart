@@ -18,7 +18,7 @@ export default function page() {
                     <h1 className="text-white text-3xl font-medium">Ready when you are.</h1>
                 </div>
                 <div className="w-full max-w-3xl px-4 mt-6">
-                <ChatInput value={value} setValue={setValue} isResponding={false} />
+                {/* <ChatInput value={value} setValue={setValue} isResponding={false} /> */}
                 </div>
             </div>
         </div>
