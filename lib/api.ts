@@ -142,7 +142,13 @@ export const getMessagesForThread = (id: string) => getJson<GetMessageDto[]>(`/a
 
 export const addMessageToThread = (id: string, payload: CreateMessageDto) => postJson<AddMessageResponse, CreateMessageDto>(`/api/threads/${id}/messages`, payload);
 
-export const getImageUrl = (url:string) => `${API_BASE}/${url}`;
+export const getImageUrl = (url:string) => {
+    const DATA_URL_REGEX = /^data:([a-zA-Z0-9][a-zA-Z0-9!#$&^_.+-]*\/[a-zA-Z0-9][a-zA-Z0-9!#$&^_.+-]*);base64,((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$/;
+
+    if (DATA_URL_REGEX.test(url)) return url;
+
+    return `${API_BASE}/${url}`;
+}
 
 
 

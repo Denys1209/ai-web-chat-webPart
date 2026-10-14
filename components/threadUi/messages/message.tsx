@@ -21,9 +21,9 @@ export default function Message({
                 <div className="flex">
                 {
                     message.imageAttachments.map((e, index) => <Image
-                    className="rounded-full mr-2 "
+                    className="rounded-full object-cover h-12.5 w-12.5 "
                     src={getImageUrl(e.url)}
-                    alt="2"
+                    alt={`image - ${index}`}
                     key={index}
                     width={50}
                     height={50}

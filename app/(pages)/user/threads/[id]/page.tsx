@@ -59,9 +59,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       thoughts: "",
       userId: auth.user?.id!
     }
+    
+
+    const getImagesDto = imagesAttached.map((e, index) => {
+        return {
+            id: crypto.randomUUID(),
+            url: `data:${e.mimeType};base64,${e.data}`,
+            mimeType: e.mimeType
+        }
+    })
 
     const userMessage: GetMessageDto = {
-      imageAttachments: [],
+      imageAttachments: getImagesDto,
       role: Roles.User,
       text,
       thoughts: "",

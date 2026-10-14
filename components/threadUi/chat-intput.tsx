@@ -119,7 +119,7 @@ export default function ChatInput({
                 {imagesAttached.map((e, index) => (
         <div key={index} className="relative ml-2 h-12.5 w-12.5">
           <Image
-            className="rounded-full object-cover"
+            className="rounded-full object-cover h-12.5 w-12.5"
             src={`data:${e.mimeType};base64,${e.data}`}
             alt={`image-${index}`}
             width={50}
