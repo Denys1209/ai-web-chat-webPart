@@ -7,7 +7,6 @@ import { addMessageToThread, getMessagesForThread, streamMessageToThread } from 
 import { useAuth } from "@/lib/auth-context";
 import { CreateImageAttachmentDto } from "@/lib/types/imageAttachmentTypes";
 import { CreateMessageDto, GetMessageDto, Roles } from "@/lib/types/messageTypes";
-import { Console } from "console";
 import { SetStateAction, use, useEffect, useRef, useState } from "react";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
