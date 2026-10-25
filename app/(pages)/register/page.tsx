@@ -63,7 +63,7 @@ export default function registerPage() {
                             <Input
                                 id="register-name"
                                 value={displayedName}
-                                onChange={(e) => setGmail(e.target.value)}
+                                onChange={(e) => setDisplayedName(e.target.value)}
                                 required
                             >
                             </Input>

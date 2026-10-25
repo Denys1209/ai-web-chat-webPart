@@ -63,7 +63,7 @@ export function AppSidebar()
                 </div>
                 <Separator/>
             </SidebarHeader>
-            <SidebarContent className="group-data-[collapsible=icon]:hidden bg-black">
+            <SidebarContent className="group-data-[collapsible=icon]:hidden bg-black group-data-[collapsible=icon]:bg-black">
                 <SidebarMenu>
                     {
                         isLoading ? Array.from({ length: 5}).map((_, index) => (

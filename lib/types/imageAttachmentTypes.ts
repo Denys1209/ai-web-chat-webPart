@@ -2,7 +2,7 @@ export interface GetImageAttachmentDto
 {
     id: string,
     url: string,
-    nimeType: string
+    mimeType: string
 }
 
 export interface CreateImageAttachmentDto

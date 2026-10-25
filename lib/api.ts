@@ -56,6 +56,69 @@ async function getJson<ResponseType>(path:string): Promise<ResponseType> {
     return res.json();
 }
 
+export async function streamMessageToThread(
+    id: string,
+    payload: CreateMessageDto,
+    onToken: (token: string) => void,
+    signal?: AbortSignal
+):Promise<void> {
+    const res = await fetch(`${API_BASE}/api/threads/${id}/messages/stream`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+            ...authHeaders(),
+        },
+        body:JSON.stringify(payload),
+        signal
+    });
+
+    if (!res.ok || !res.body)
+    {
+        const message = await res.text();
+        throw new Error(message || `Request failed with status ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+
+    const decoder = new TextDecoder();
+
+    let buffer = "";
+
+    while(true)
+    {
+        const {value, done} =await reader.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, {stream: true});
+
+        const frames = buffer.split("\n\n");
+
+        buffer = frames.pop() ?? "";
+
+        for (const frame of frames)
+        {
+            for (const line of frame.split("\n"))
+            {
+                if (!line.startsWith("data:")) continue;
+
+                const json = line.slice(5).trim();
+
+                if (!json) continue;
+
+                try 
+                {
+                    const {token} = JSON.parse(json) as {token: string};
+                    onToken(token);
+
+                }
+                catch{}
+            }
+        }
+    }
+}
+
 export const register = (payload: RegisterPayload) => postJson<AuthResponse, RegisterPayload>("/api/auth/register", payload);
 export const login = (payload: LoginPayLoad) => postJson<AuthResponse, LoginPayLoad>("/api/auth/login", payload);
 
@@ -65,4 +128,13 @@ export const createThread = (payload: CreateThreadDto) => postJson<{id:string}, 
 export const getMessagesForThread = (id: string) => getJson<GetMessageDto[]>(`/api/threads/${id}`);
 
 export const addMessageToThread = (id: string, payload: CreateMessageDto) => postJson<AddMessageResponse, CreateMessageDto>(`/api/threads/${id}/messages`, payload);
+
+export const getImageUrl = (url: string) => 
+{
+    const DATA_URL_REGEX = /^data:([a-zA-Z0-9][a-zA-Z0-9!#$&^_.+-]*\/[a-zA-Z0-9][a-zA-Z0-9!#$&^_.+-]*);base64,((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$/;
+
+    if (DATA_URL_REGEX.test(url)) return url;
+
+    return `${API_BASE}/${url}`;
+}
 
